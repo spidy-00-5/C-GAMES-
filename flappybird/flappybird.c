@@ -10,7 +10,7 @@ int main(){
   Texture2D redbird    = LoadTexture("assets/flappy-bird-assets/sprites/redbird-downflap.png");  
   Texture2D base       = LoadTexture("assets/flappy-bird-assets/sprites/base.png");
  
-  float scrollingbase = 0.0f;
+  float scrollingbase = 0.9f;
   int  redbird_positionX = 1;
   double redbird_positionY = 0;
 
@@ -21,7 +21,7 @@ int main(){
   while(!WindowShouldClose())
   {
 
-    scrollingbase -= 0.1f;
+    scrollingbase -= 0.9f;
     redbird_positionX  = 20  ;
     redbird_positionY  += 3;
 
@@ -37,11 +37,11 @@ int main(){
       
          ClearBackground(RAYWHITE);
          DrawTexture(background, 0 , 0 , WHITE);
-         DrawTexture(greenpipe, screenWidth/2, screenHeight-(greenpipe.height) , WHITE);
+      //   DrawTexture(greenpipe, screenWidth/2, screenHeight-(greenpipe.height) , WHITE);
+         DrawTextureEx(greenpipe, (Vector2){scrollingbase,screenHeight - (greenpipe.height)}, 0.0f, 2.0f, WHITE );
          DrawTexture(redbird, redbird_positionX,redbird_positionY,WHITE);
-       //  DrawTexture(base, 0 ,screenHeight-base.height,WHITE);
-         DrawTextureEx(base, (Vector2){ scrollingbase, 70 }, 0.0f, 2.0f, WHITE);
-         DrawTextureEx(base, (Vector2){ base.width*2 + scrollingbase, 70 }, 0.0f, 2.0f, WHITE);
+         DrawTextureEx(base, (Vector2){ scrollingbase, screenHeight - base.height }, 0.0f, 2.0f, WHITE);
+         DrawTextureEx(base, (Vector2){background.width*2 + scrollingbase ,screenHeight - base.height }, 0.0f, 2.0f, WHITE);
 
          
 
