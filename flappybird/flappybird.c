@@ -2,7 +2,23 @@
 int main(){
   const int screenWidth = 288;
   const int screenHeight = 512;
-  
+ 
+
+
+  typedef struct Floppy {
+    Vector2 position;
+    Texture2D floppybird;
+    int radius;
+
+  } Floppy;
+
+  typedef struct Tube {
+    Rectangle rec;
+    Texture2D pipe;
+
+  } Tube ;
+   
+
   InitWindow(screenWidth,screenHeight,"flappy bird");
 
   Texture2D background  = LoadTexture("assets/flappy-bird-assets/sprites/background-day.png");
@@ -11,48 +27,55 @@ int main(){
   Texture2D base        = LoadTexture("assets/flappy-bird-assets/sprites/base.png");
   Texture2D redbird2    = LoadTexture("assets/flappy-bird-assets/sprites/redbird-midflap.png"); 
   Texture2D redbird3    = LoadTexture("assets/flappy-bird-assets/sprites/redbird-upflap.png");  
-  Texture2D redbird ; 
+  Texture2D redbird ;
+ 
+  static Floppy floppy ;
+  floppy.floppybird  = redbird1;
+  floppy.position.x  = 1;
+  floppy.position.y  = 0;
+  floppy.radius      = redbird1.width/3; 
 
-  float scrollingbase      = 0.9f;
-  int  redbird_positionX   = 1;
-  double redbird_positionY = 0;
-
+  static Tube tube;
+  tube.pipe = greenpipe;
+  tube.rec  = (Rectangle){ screenWidth/2,screenHeight-(greenpipe.height),greenpipe.width,greenpipe.height};
+  
+  tube.rec.x = 0;
+ 
   double time = GetTime();
-
   SetTargetFPS(60);
  
   while(!WindowShouldClose())
   {
-    redbird    = redbird1;
-    scrollingbase      -= 0.9f;
-    redbird_positionX  = 20  ;
-    redbird_positionY  += 3;
+    tube.rec.x  -= 0.9f;
+    floppy.position.y  += 2;
 
-    if(scrollingbase <= -base.width*2) scrollingbase = 0;
+    if(tube.rec.x <= -base.width) tube.rec.x = 0;
 
     if(IsKeyPressed(KEY_SPACE)){
+      floppy.position.y -= 50 ;
 
-      redbird_positionY -= 50 ;
-      redbird = redbird3;
-    }
+      }
     
-    if(redbird_positionY >= screenHeight-base.height || redbird_positionY <= 0) redbird_positionY = 100;
-    
+    if(floppy.position.y >= screenHeight-base.height || floppy.position.y <= 0) floppy.position.y = 100;
 
     
-    BeginDrawing();
-      
+    BeginDrawing();  
          ClearBackground(RAYWHITE);
          DrawTexture(background, 0 , 0 , WHITE);
-         DrawTextureEx(greenpipe, (Vector2){scrollingbase+background.width,screenHeight - (greenpipe.height)}, 0.0f, 1.0f, WHITE );
-         DrawTexture(redbird, redbird_positionX,redbird_positionY,WHITE);
-         DrawTextureEx(base, (Vector2){ scrollingbase, screenHeight - base.height }, 0.0f, 2.0f, WHITE);
-         DrawTextureEx(base, (Vector2){background.width*2 + scrollingbase ,screenHeight - base.height }, 0.0f, 2.0f, WHITE);
 
-         
+         DrawTextureEx(tube.pipe, (Vector2){ (tube.rec.x)+screenHeight,tube.rec.y}, 0.0f, 1.0f, WHITE );
+
+         DrawTextureEx(tube.pipe, (Vector2){( tube.rec.x)+screenWidth , (tube.rec.y)}, 180.0f, 1.0f, WHITE );
+
+         DrawTexture(floppy.floppybird, floppy.position.x,floppy.position.y,WHITE);
+
+         DrawTextureEx(base, (Vector2){ tube.rec.x, screenHeight - base.height }, 0.0f, 2.0f, WHITE);
+
+         DrawTextureEx(base, (Vector2){ screenWidth + tube.rec.x ,screenHeight - base.height }, 0.0f, 2.0f, WHITE);
 
     EndDrawing();
-
+     Vector2 center = (Vector2){ floppy.position.x + redbird1.width/2, floppy.position.y + redbird1.height/2 };
+    if( CheckCollisionCircleRec(center, floppy.radius, tube.rec)) return 0;
   }
     UnloadTexture(background);
     UnloadTexture(greenpipe);
