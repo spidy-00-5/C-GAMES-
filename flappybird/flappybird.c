@@ -1,0 +1,59 @@
+#include "raylib.h"
+int main(){
+  const int screenWidth = 288;
+  const int screenHeight = 512;
+  
+  InitWindow(screenWidth,screenHeight,"flappy bird");
+
+  Texture2D background = LoadTexture("assets/flappy-bird-assets/sprites/background-day.png");
+  Texture2D greenpipe  = LoadTexture("assets/flappy-bird-assets/sprites/pipe-green.png");
+  Texture2D redbird    = LoadTexture("assets/flappy-bird-assets/sprites/redbird-downflap.png");  
+  Texture2D base       = LoadTexture("assets/flappy-bird-assets/sprites/base.png");
+ 
+  float scrollingbase = 0.0f;
+  int  redbird_positionX = 1;
+  double redbird_positionY = 0;
+
+  double time = GetTime();
+
+  SetTargetFPS(60);
+
+  while(!WindowShouldClose())
+  {
+
+    scrollingbase -= 0.1f;
+    redbird_positionX  = 20  ;
+    redbird_positionY  += 3;
+
+    if(scrollingbase <= -base.width*2) scrollingbase = 0;
+    
+    if(IsKeyPressed(KEY_SPACE))redbird_positionY -= 50 ;
+    
+    if(redbird_positionY >= screenHeight-base.height || redbird_positionY <= 0) redbird_positionY = 100;
+    
+
+    
+    BeginDrawing();
+      
+         ClearBackground(RAYWHITE);
+         DrawTexture(background, 0 , 0 , WHITE);
+         DrawTexture(greenpipe, screenWidth/2, screenHeight-(greenpipe.height) , WHITE);
+         DrawTexture(redbird, redbird_positionX,redbird_positionY,WHITE);
+       //  DrawTexture(base, 0 ,screenHeight-base.height,WHITE);
+         DrawTextureEx(base, (Vector2){ scrollingbase, 70 }, 0.0f, 2.0f, WHITE);
+         DrawTextureEx(base, (Vector2){ base.width*2 + scrollingbase, 70 }, 0.0f, 2.0f, WHITE);
+
+         
+
+    EndDrawing();
+
+  }
+    UnloadTexture(background);
+    UnloadTexture(greenpipe);
+    UnloadTexture(redbird);
+    UnloadTexture(base);
+    CloseWindow();
+    return 0;
+} 
+
+
