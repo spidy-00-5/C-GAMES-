@@ -10,6 +10,13 @@ int main(){
   
 
   InitWindow(screenWidth,screenHeight,"flappy bird");
+  InitAudioDevice();
+  
+  Sound     die  = LoadSound("assets/flappy-bird-assets/audio/die.ogg");
+  Sound     hit  = LoadSound("assets/flappy-bird-assets/audio/hit.ogg");
+  Sound     point   = LoadSound("assets/flappy-bird-assets/audio/point.ogg");
+  Sound     swoosh = LoadSound("assets/flappy-bird-assets/audio/swoosh.ogg");
+  Sound     wing   = LoadSound("assets/flappy-bird-assets/audio/wing.ogg");
 
   Texture2D background = LoadTexture("assets/flappy-bird-assets/sprites/background-day.png");
   Texture2D base      = LoadTexture("assets/flappy-bird-assets/sprites/base.png");
@@ -37,7 +44,7 @@ int main(){
 
   bird floppybird;
   floppybird.spirites = bird_downflap;
-  floppybird.position = (Vector2){1,1};
+  floppybird.position = (Vector2){10,10};
   floppybird.radius = (bird_downflap.height+bird_downflap.width)/4.0f;
 
   pipe_pair pipes[maxpipe];
@@ -70,13 +77,20 @@ int main(){
    if(IsKeyPressed(KEY_SPACE)){
       floppybird.spirites = bird_upflap;
       floppybird.position.y -= 50;
+      PlaySound(wing);
     } 
    if(floppybird.position.y <= 0 || floppybird.position.y >= screenHeight-base.height) return 0  ;
     
     
-    for(int i = 0;i< 100;i++){
-       if(CheckCollisionCircleRec(center , floppybird.radius,pipes[i].bottom)) return 0 ;
-       if(CheckCollisionCircleRec(center , floppybird.radius,pipes[i].top)) return 0 ;
+    for(int i = 0;i< maxpipe;i++){
+       if(CheckCollisionCircleRec(center , floppybird.radius,pipes[i].bottom)){
+        PlaySound(hit);
+        return 0 ;
+      }
+       if(CheckCollisionCircleRec(center , floppybird.radius,pipes[i].top)){
+        PlaySound(hit);
+        return 0 ;
+      }
        pipes[i].bottom.x -= 1.5;
        pipes[i].top.x -= 1.5;
 
@@ -89,15 +103,8 @@ int main(){
 
       for(int i = 0; i < maxpipe ; i++){
         
-        Rectangle src = {0, 0, pipe_green.width, pipe_green.height};
-        Rectangle dest = pipes[i].top;
-        Vector2 origin = {pipe_green.width/2, pipe_green.height/2};
-
-      
         DrawTextureEx(pipes[i].pipe,(Vector2){pipes[i].bottom.x , pipes[i].bottom.y},0,1.0f,WHITE);
         DrawTextureEx(pipes[i].pipe1,(Vector2){pipes[i].top.x , pipes[i].top.y},0,1.0f,WHITE);
-        DrawRectangleLines( pipes[i].bottom.x, pipes[i].bottom.y, pipes[i].bottom.width, pipes[i].bottom.height,RED);
-        DrawRectangleLines( pipes[i].top.x, pipes[i].top.y, pipes[i].top.width, pipes[i].top.height,RED);
 
      }
         DrawTexture(floppybird.spirites,floppybird.position.x,floppybird.position.y,WHITE);
