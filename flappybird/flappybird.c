@@ -17,7 +17,7 @@ int main(){
   Texture2D bird_downflap = LoadTexture("assets/flappy-bird-assets/sprites/redbird-downflap.png");
   Texture2D bird_midflap = LoadTexture("assets/flappy-bird-assets/sprites/redbird-midflap.png");
   Texture2D bird_upflap = LoadTexture("assets/flappy-bird-assets/sprites/redbird-upflap.png");
-
+  Texture2D pipe_inverted = LoadTexture("assets/flappy-bird-assets/sprites/pipe-green-inverted.png");
   typedef struct bird {
     
     Texture2D spirites;
@@ -29,6 +29,7 @@ int main(){
   typedef struct pipe_pair{
     
     Texture2D pipe;
+    Texture2D pipe1;
     Rectangle top;
     Rectangle bottom;
 
@@ -47,10 +48,12 @@ int main(){
   for(int i = 0 ; i < 100; i++){
 
     pipes[i].pipe = pipe_green;
+    pipes[i].pipe1 = pipe_inverted;
     float x = (screenWidth/2) + i * gap;
-    float random = GetRandomValue(-120,-20); 
-    pipes[i].bottom = (Rectangle){ x, (pipe_green.height + random ), pipe_green.width, pipe_green.height};
-    pipes[i].top = (Rectangle){ x ,-(pipe_green.height + random+20), pipe_green.width, pipe_green.height };
+    float randombottom = GetRandomValue(-80,-60); 
+    float randomtop = GetRandomValue(-130,-80);
+    pipes[i].bottom = (Rectangle){ x, (pipe_green.height + randombottom ), pipe_green.width, pipe_green.height};
+    pipes[i].top = (Rectangle){ x ,- (pipe_green.height + randomtop), pipe_green.width, pipe_green.height };
   }
 
   SetTargetFPS(60);
@@ -73,6 +76,7 @@ int main(){
     
     for(int i = 0;i< 100;i++){
        if(CheckCollisionCircleRec(center , floppybird.radius,pipes[i].bottom)) return 0 ;
+       if(CheckCollisionCircleRec(center , floppybird.radius,pipes[i].top)) return 0 ;
        pipes[i].bottom.x -= 1.5;
        pipes[i].top.x -= 1.5;
 
@@ -84,10 +88,14 @@ int main(){
       DrawTexture(background,0,0,WHITE);
 
       for(int i = 0; i < maxpipe ; i++){
-      
+        
+        Rectangle src = {0, 0, pipe_green.width, pipe_green.height};
+        Rectangle dest = pipes[i].top;
+        Vector2 origin = {pipe_green.width/2, pipe_green.height/2};
 
       
         DrawTextureEx(pipes[i].pipe,(Vector2){pipes[i].bottom.x , pipes[i].bottom.y},0,1.0f,WHITE);
+        DrawTextureEx(pipes[i].pipe1,(Vector2){pipes[i].top.x , pipes[i].top.y},0,1.0f,WHITE);
         DrawRectangleLines( pipes[i].bottom.x, pipes[i].bottom.y, pipes[i].bottom.width, pipes[i].bottom.height,RED);
         DrawRectangleLines( pipes[i].top.x, pipes[i].top.y, pipes[i].top.width, pipes[i].top.height,RED);
 
