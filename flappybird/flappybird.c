@@ -17,7 +17,7 @@ int main(){
   Sound     point   = LoadSound("assets/flappy-bird-assets/audio/point.ogg");
   Sound     swoosh = LoadSound("assets/flappy-bird-assets/audio/swoosh.ogg");
   Sound     wing   = LoadSound("assets/flappy-bird-assets/audio/wing.ogg");
-  Sound     song   = LoadSound("assets/flappy-bird-assets/audio/song.mp4");
+  Music song   = LoadMusicStream("assets/flappy-bird-assets/audio/song.mp4");
 
   Texture2D background = LoadTexture("assets/flappy-bird-assets/sprites/background-day.png");
   Texture2D base      = LoadTexture("assets/flappy-bird-assets/sprites/base.png");
@@ -72,6 +72,7 @@ int main(){
   }
 
   SetTargetFPS(60);
+  PlayMusicStream(song);
 
   while(!WindowShouldClose()){
 
@@ -81,8 +82,8 @@ int main(){
 
    if(game) {
 
-     PlaySound(song);
-
+     UpdateMusicStream(song);
+      
      floppybird.position.y += 2;  
      basespeed -= 1.5f;
      if(basespeed <= -base.width) basespeed = 0 ; 
