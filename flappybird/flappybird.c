@@ -1,6 +1,6 @@
 #include"raylib.h"
 
-#define maxpipe 100 ;
+#define maxpipe 100 
 
 
 int main(){
@@ -9,7 +9,7 @@ int main(){
   const int screenHeight = 512;
   
 
-  InitWndow(screenWidth,screenHeight,"flappy bird");
+  InitWindow(screenWidth,screenHeight,"flappy bird");
 
   Texture2D background = LoadTexture("flappybird/asserts/flappy-bird-assets/sprites/background-day.png");
   Texture2D base      = LoadTexture("flappybird/asserts/flappy-bird-assets/sprites/base.png");
@@ -20,7 +20,7 @@ int main(){
 
   typedef struct bird {
     
-    Texture2D sprites;
+    Texture2D spirites;
     Vector2   position;
     float     radius;
 
@@ -35,21 +35,21 @@ int main(){
   }pipe_pair;
 
   bird floppybird;
-  floppybird.spirit = bird_downflap;
-  floppybird.position = {1,1};
+  floppybird.spirites = bird_downflap;
+  floppybird.position = (Vector2){1,1};
   floppybird.radius = (bird_downflap.height+bird_downflap.width)/6.0f;
 
   pipe_pair pipes[maxpipe];
   int gap = 120;
   float basespeed = 0.0f;
-  Vector2 center = (Vector2){floppybird.position.x + (floppybird.spirit.width)/2 ,floppybird.position.y + (floppybird.spirit.height)/2}
+  Vector2 center = (Vector2){floppybird.position.x + (floppybird.spirites.width)/2 ,floppybird.position.y + (floppybird.spirites.height)/2};
 
    
-  for(int i = 0,i < 100; i++){
-    
+  for(int i = 0 ; i < 100; i++){
+
     pipes[i].pipe = pipe_green;
-    pipe[i].bottom = (Rectangle){(screenWidth/2)+i*gap,screenHeight - pipe_green.height + GetRandomValue(-60,10)}
-    pipe[i].top =(Rectangle){0+i*gap , pipe_green+GetRandomValue(0,20)}; 
+    pipes[i].bottom = (Rectangle){(screenWidth/2)+i*gap,screenHeight - pipe_green.height + GetRandomValue(-60,10)};
+    pipes[i].top =(Rectangle){0+i*gap , pipe_green.height+GetRandomValue(0,20)}; 
 
   }
 
@@ -61,32 +61,32 @@ int main(){
    if(basespeed <= -base.width) basespeed = 0 ; 
    
    if(IsKeyPressed(KEY_SPACE)){
-      floppybird.spirit = bird_upflap;
+      floppybird.spirites = bird_upflap;
       floppybird.position.y += 5;
     } 
    if(floppybird.position.y <= 0 || floppybird.position.y >= screenHeight-base.height) return 0  ;
     
     
     for(int i = 0;i< 100;i++){
-       if(CheckCollisionCircleRec(center , flappy.radius,pipes[i].top.y)) return 0 ;
-       if(CheckCollisionCircleRec(center , flappy.radius,pipes[i].bottom.y)) return 0 ;
+       if(CheckCollisionCircleRec(center , floppybird.radius,pipes[i].top)) return 0 ;
+       if(CheckCollisionCircleRec(center , floppybird.radius,pipes[i].bottom)) return 0 ;
     }
 
     BeginDrawing();
 
-      clearBackground(RAYWHITE);
-      DrawText(background,0,0,WHITE);
+      ClearBackground(RAYWHITE);
+      DrawTexture(background,0,0,WHITE);
 
       for(int i = 0; i < 100 ; i++){
 
-        DrawTextpro();
-        DrawTextEx();
+        //DrawTextpro();
+        DrawTextureEx(pipes[i].pipe,(Vector2){pipes[i].bottom.x,pipes[i].bottom.y},0.0f,0.0f,WHITE);
 
      }
       
-      DrawText(floppybird.spirit,floppybird.position.x,floppybird.position.y,WHITE);
-      DrawTextEx( base ,(Vector2){basespeed + base.width,screenHeight-base.height},0.0f,0.2f,WHITE);
-      DrawTextEx( base ,(Vector2){basespeed ,screenHeight-base.height},0.0f,0.2f,WHITE);
+      DrawTexture(floppybird.spirites,floppybird.position.x,floppybird.position.y,WHITE);
+      DrawTextureEx( base ,(Vector2){basespeed + base.width,screenHeight-base.height},0.0f,0.2f,WHITE);
+      DrawTextureEx( base ,(Vector2){basespeed ,screenHeight-base.height},0.0f,0.2f,WHITE);
      
   }
 
