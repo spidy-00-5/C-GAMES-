@@ -55,6 +55,7 @@ int main() {
     InitWindow(screenWidth, screenHeight, "flappy bird");
     InitAudioDevice();
 
+    Music  bgm   = LoadMusicStream("assets/flappy-bird-assets/audio/song.mp3");
     Sound wing   = LoadSound("assets/flappy-bird-assets/audio/wing.ogg");
     Sound hit    = LoadSound("assets/flappy-bird-assets/audio/hit.ogg");
     Sound point  = LoadSound("assets/flappy-bird-assets/audio/point.ogg");
@@ -68,8 +69,8 @@ int main() {
     Texture2D bird_upflap   = LoadTexture("assets/flappy-bird-assets/sprites/redbird-upflap.png");
     Texture2D gameover      = LoadTexture("assets/flappy-bird-assets/sprites/gameover.png");
     Texture2D message       = LoadTexture("assets/flappy-bird-assets/sprites/message.png");
-    
-
+     
+    PlayMusicStream(bgm);
     GameState state = STATE_WAIT_START;
     floppybird.spirites = bird_downflap;
 
@@ -83,6 +84,9 @@ int main() {
     SetTargetFPS(60);
 
     while (!WindowShouldClose()) {
+
+      
+        UpdateMusicStream(bgm);
 
         if(state == STATE_WAIT_START){
             if(IsKeyPressed(KEY_S)){
@@ -138,15 +142,15 @@ int main() {
         BeginDrawing();
 
         if(state == STATE_WAIT_START){
-            ClearBackground(BLACK);
-            DrawTexture(message, gameoverpos.x, gameoverpos.y, WHITE);
-            DrawText("PRESS S TO START", 25, screenHeight/2 + 90, 20, WHITE);
+            ClearBackground((Color){154,181,95,255});
+            DrawTexture(message, gameoverpos.x , gameoverpos.y -50, WHITE);
+            DrawText("PRESS S TO START", 30, screenHeight/2 + 120, 20, WHITE);
         }
 
         if(state == STATE_GAMEOVER){
             ClearBackground((Color){ 154, 181, 95, 255 });
             DrawTexture(gameover, gameoverpos.x, gameoverpos.y, WHITE);
-            DrawText("PRESS R TO RESTART ",20,screenHeight/2 +50,20,RED);
+            DrawText("PRESS R TO RESTART ",20,screenHeight/2 +120,20,RED);
         }
 
         if(state == STATE_PLAY){
@@ -168,6 +172,7 @@ int main() {
     UnloadSound(hit);
     UnloadSound(point);
     UnloadSound(wing);
+    UnloadMusicStream(bgm);
     UnloadTexture(background);
     UnloadTexture(pipe_green);
     UnloadTexture(pipe_inverted);
