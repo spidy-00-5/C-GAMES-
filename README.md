@@ -1,5 +1,6 @@
 this /these games are made in "C" using frame work called "ray lib";
 
+how to run on macOS || similar in linux also 
 
 first clone then 
 
