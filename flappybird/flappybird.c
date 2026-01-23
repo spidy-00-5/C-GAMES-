@@ -2,59 +2,40 @@
 
 #define MAX_PIPE 100
 
-int main() {
+typedef enum {
+    STATE_WAIT_START,
+    STATE_PLAY,
+    STATE_GAMEOVER
+} GameState;
 
-    const int screenWidth  = 288;
-    const int screenHeight = 512;
+typedef struct {
+    Texture2D spirites;
+    Vector2 position;
+    float radius;
+} Bird;
 
-    InitWindow(screenWidth, screenHeight, "flappy bird");
-    InitAudioDevice();
+typedef struct {
+    Texture2D pipe;
+    Texture2D pipe1;
+    Rectangle top;
+    Rectangle bottom;
+} PipePair;
 
-    Sound die    = LoadSound("assets/flappy-bird-assets/audio/die.ogg");
-    Sound hit    = LoadSound("assets/flappy-bird-assets/audio/hit.ogg");
-    Sound point  = LoadSound("assets/flappy-bird-assets/audio/point.ogg");
-    Sound swoosh = LoadSound("assets/flappy-bird-assets/audio/swoosh.ogg");
-    Sound wing   = LoadSound("assets/flappy-bird-assets/audio/wing.ogg");
-    Music song   = LoadMusicStream("assets/flappy-bird-assets/audio/song.mp4");
+Bird floppybird;
+PipePair pipes[MAX_PIPE];
+int gap = 150;
+float basespeed = 0.0f;
+int screenWidth = 288;
+int screenHeight = 512;
 
-    Texture2D background    = LoadTexture("assets/flappy-bird-assets/sprites/background-day.png");
-    Texture2D base          = LoadTexture("assets/flappy-bird-assets/sprites/base.png");
-    Texture2D pipe_green    = LoadTexture("assets/flappy-bird-assets/sprites/pipe-green.png");
-    Texture2D bird_downflap = LoadTexture("assets/flappy-bird-assets/sprites/redbird-downflap.png");
-    Texture2D bird_midflap  = LoadTexture("assets/flappy-bird-assets/sprites/redbird-midflap.png");
-    Texture2D bird_upflap   = LoadTexture("assets/flappy-bird-assets/sprites/redbird-upflap.png");
-    Texture2D pipe_inverted = LoadTexture("assets/flappy-bird-assets/sprites/pipe-green-inverted.png");
-    Texture2D gameover      = LoadTexture("assets/flappy-bird-assets/sprites/gameover.png");
-    Texture2D message       = LoadTexture("assets/flappy-bird-assets/sprites/message.png");
+Texture2D pipe_green, pipe_inverted;
 
-    typedef struct bird {
-        Texture2D spirites;
-        Vector2   position;
-        float     radius;
-    } bird;
+void ResetGame(void) {
 
-    typedef struct pipe_pair {
-        Texture2D pipe;
-        Texture2D pipe1;
-        Rectangle top;
-        Rectangle bottom;
-    } pipe_pair;
-
-    bird floppybird;
-    floppybird.spirites = bird_downflap;
     floppybird.position = (Vector2){ 10, screenHeight/2 };
-    floppybird.radius   = (bird_downflap.height + bird_downflap.width) / 4.0f;
+    floppybird.radius = 15;
 
-    pipe_pair pipes[MAX_PIPE];
-    int   gap       = 150;
-    float basespeed = 0.0f;
-    bool  gameend   = false;
-    bool  pause     = false;
-
-    Vector2 gameoverpos = (Vector2){
-        (screenWidth/2) - (gameover.width)/2,
-        ((screenHeight/2) - (gameover.height/2)) - 50
-    };
+    basespeed = 0;
 
     for (int i = 0; i < MAX_PIPE; i++) {
         pipes[i].pipe  = pipe_green;
@@ -67,80 +48,134 @@ int main() {
         pipes[i].bottom = (Rectangle){ x, (pipe_green.height + randombottom),  pipe_green.width, pipe_green.height };
         pipes[i].top    = (Rectangle){ x, -(pipe_green.height + randomtop),     pipe_green.width, pipe_green.height };
     }
+}
+
+int main() {
+
+    InitWindow(screenWidth, screenHeight, "flappy bird");
+    InitAudioDevice();
+
+    Sound wing   = LoadSound("assets/flappy-bird-assets/audio/wing.ogg");
+    Sound hit    = LoadSound("assets/flappy-bird-assets/audio/hit.ogg");
+    Sound point  = LoadSound("assets/flappy-bird-assets/audio/point.ogg");
+    Sound die    = LoadSound("assets/flappy-bird-assets/audio/die.ogg");
+
+    Texture2D background    = LoadTexture("assets/flappy-bird-assets/sprites/background-day.png");
+    Texture2D base          = LoadTexture("assets/flappy-bird-assets/sprites/base.png");
+    pipe_green              = LoadTexture("assets/flappy-bird-assets/sprites/pipe-green.png");
+    pipe_inverted           = LoadTexture("assets/flappy-bird-assets/sprites/pipe-green-inverted.png");
+    Texture2D bird_downflap  = LoadTexture("assets/flappy-bird-assets/sprites/redbird-downflap.png");
+    Texture2D bird_upflap   = LoadTexture("assets/flappy-bird-assets/sprites/redbird-upflap.png");
+    Texture2D gameover      = LoadTexture("assets/flappy-bird-assets/sprites/gameover.png");
+    Texture2D message       = LoadTexture("assets/flappy-bird-assets/sprites/message.png");
+    
+
+    GameState state = STATE_WAIT_START;
+    floppybird.spirites = bird_downflap;
+
+    ResetGame();
+
+    Vector2 gameoverpos = (Vector2){
+        (screenWidth/2) - (gameover.width)/2,
+        ((screenHeight/2) - (gameover.height/2)) - 50
+    };
 
     SetTargetFPS(60);
-    PlayMusicStream(song);
 
     while (!WindowShouldClose()) {
 
-        if (!gameend) {
+        if(state == STATE_WAIT_START){
+            if(IsKeyPressed(KEY_S)){
+                ResetGame();
+                state = STATE_PLAY;
+            }
+        }
 
-            if (IsKeyPressed('p')) pause = !pause;
+        else if(state == STATE_PLAY){
 
-            if (!pause) {
+            floppybird.position.y += 2;
 
-                UpdateMusicStream(song);
+            if (IsKeyPressed(KEY_SPACE)) {
+                floppybird.spirites = bird_upflap;
+                floppybird.position.y -= 50;
+                PlaySound(wing);
+            }
 
-                floppybird.position.y += 2;
-                basespeed -= 1.5f;
-                if (basespeed <= -base.width) basespeed = 0;
+            if (floppybird.position.y <= 0 ||
+                floppybird.position.y >= screenHeight - base.height) {
+                PlaySound(hit);
+                PlaySound(die);
+                state = STATE_GAMEOVER;
+                
+            }
 
-                Vector2 center = (Vector2){
-                    floppybird.position.x + (bird_downflap.width/2),
-                    floppybird.position.y + (bird_downflap.height/2)
-                };
+            Vector2 center = (Vector2){
+                floppybird.position.x + 15,
+                floppybird.position.y + 15
+            };
 
-                if (IsKeyPressed(KEY_SPACE)) {
-                    floppybird.spirites = bird_upflap;
-                    floppybird.position.y -= 50;
-                    PlaySound(wing);
+            for (int i = 0; i < MAX_PIPE; i++) {
+
+                if (CheckCollisionCircleRec(center, floppybird.radius, pipes[i].bottom) ||
+                    CheckCollisionCircleRec(center, floppybird.radius, pipes[i].top)) {
+                    PlaySound(hit);
+                    PlaySound(die);
+                    state = STATE_GAMEOVER;
                 }
 
-                if (floppybird.position.y <= 0 ||
-                    floppybird.position.y >= screenHeight - base.height) {
-                    return 0;
-                }
+                pipes[i].bottom.x -= 1.5;
+                pipes[i].top.x    -= 1.5;
+            }
+        }
 
-                for (int i = 0; i < MAX_PIPE; i++) {
-
-                    if (CheckCollisionCircleRec(center, floppybird.radius, pipes[i].bottom)) {
-                        PlaySound(hit);
-                        gameend = true;
-                    }
-
-                    if (CheckCollisionCircleRec(center, floppybird.radius, pipes[i].top)) {
-                        PlaySound(hit);
-                        gameend = true;
-                    }
-
-                    pipes[i].bottom.x -= 1.5;
-                    pipes[i].top.x    -= 1.5;
-                }
+        else if(state == STATE_GAMEOVER) {
+            if(IsKeyPressed(KEY_R)) {
+                ResetGame();
+                state = STATE_WAIT_START;
             }
         }
 
         BeginDrawing();
 
-        ClearBackground(RAYWHITE);
-        DrawTexture(background, 0, 0, WHITE);
-
-      
-        if (gameend)DrawTexture(gameover, gameoverpos.x, gameoverpos.y, WHITE);
-
-        for (int i = 0; i < MAX_PIPE; i++) {
-            DrawTextureEx(pipes[i].pipe,  (Vector2){ pipes[i].bottom.x, pipes[i].bottom.y }, 0, 1.0f, WHITE);
-            DrawTextureEx(pipes[i].pipe1, (Vector2){ pipes[i].top.x,    pipes[i].top.y    }, 0, 1.0f, WHITE);
+        if(state == STATE_WAIT_START){
+            ClearBackground(BLACK);
+            DrawTexture(message, gameoverpos.x, gameoverpos.y, WHITE);
+            DrawText("PRESS S TO START", 25, screenHeight/2 + 90, 20, WHITE);
         }
 
-        DrawTexture(message, gameoverpos.x, gameoverpos.y, WHITE);
-        DrawTexture(floppybird.spirites, floppybird.position.x, floppybird.position.y, WHITE);
+        if(state == STATE_GAMEOVER){
+            ClearBackground((Color){ 154, 181, 95, 255 });
+            DrawTexture(gameover, gameoverpos.x, gameoverpos.y, WHITE);
+            DrawText("PRESS R TO RESTART ",20,screenHeight/2 +50,20,RED);
+        }
 
-        DrawTextureEx(base, (Vector2){ basespeed + base.width, screenHeight - base.height }, 0, 1.0f, WHITE);
-        DrawTextureEx(base, (Vector2){ basespeed,              screenHeight - base.height }, 0, 1.0f, WHITE);
+        if(state == STATE_PLAY){
+            ClearBackground(RAYWHITE);
+            DrawTexture(background,0,0,RAYWHITE);
+            for (int i = 0; i < MAX_PIPE; i++) {
+                DrawTextureEx(pipes[i].pipe,  (Vector2){ pipes[i].bottom.x, pipes[i].bottom.y }, 0, 1.0f, WHITE);
+                DrawTextureEx(pipes[i].pipe1, (Vector2){ pipes[i].top.x,    pipes[i].top.y    }, 0, 1.0f, WHITE);
+            }
+
+            DrawTexture(floppybird.spirites, floppybird.position.x, floppybird.position.y, WHITE);
+            DrawTextureEx(base, (Vector2){ basespeed + base.width, screenHeight - base.height }, 0, 1.0f, WHITE);
+            DrawTextureEx(base, (Vector2){ basespeed,              screenHeight - base.height }, 0, 1.0f, WHITE);
+        }
 
         EndDrawing();
     }
-
+    UnloadSound(die);
+    UnloadSound(hit);
+    UnloadSound(point);
+    UnloadSound(wing);
+    UnloadTexture(background);
+    UnloadTexture(pipe_green);
+    UnloadTexture(pipe_inverted);
+    UnloadTexture(bird_downflap);
+    UnloadTexture(bird_upflap);
+    UnloadTexture(gameover);
+    UnloadTexture(message);
+    UnloadTexture(base);
     CloseWindow();
     return 0;
 }
